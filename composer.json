@@ -18,7 +18,7 @@
         "php": ">=5.4.0"        
     },
     "autoload": {
-        "prs-0": {
+        "psr-0": {
             "ShaLongPooling": "src/"
         }
     }
