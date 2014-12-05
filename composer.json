@@ -1,0 +1,25 @@
+{
+    "name": "necromant2005/tt-long-pooling",
+    "type": "library",
+    "description": "long pooling based on React",
+    "keywords": ["long pooling", "React"],
+    "homepage": "https://github.com/necromant2005/tt-long-pooling",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrii Shobotenko",
+            "email": "sha.indigo@gmail.com",
+            "homepage": "https://github.com/shabot",
+            "role": "Developer"
+        }
+    ],    
+    "require": {
+        "react/react": "0.4.*",
+        "php": ">=5.4.0"        
+    },
+    "autoload": {
+        "prs-0": {
+            "ShaLongPooling": "src/"
+        }
+    }
+}
