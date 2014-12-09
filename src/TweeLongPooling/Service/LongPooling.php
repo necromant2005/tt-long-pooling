@@ -4,6 +4,7 @@ namespace TweeLongPooling\Service;
 
 use SplObjectStorage;
 use Exception;
+use Closure;
 use React\EventLoop\Factory;
 use React\Socket\Server;
 use React\Socket\Connection;
@@ -11,6 +12,8 @@ use React\Http\RequestHeaderParser;
 
 class LongPooling
 {
+    const COUNT = 'count';
+
     /**
     *
     * Pull of the connections
@@ -25,7 +28,11 @@ class LongPooling
     * 
     * @var array
     */
-    private $config = ['listen' => [1337], 'callsLimit' => 20, 'timePeriod' => 1];
+    private $config = [
+                'listen' => [1337], 
+                'callsLimit' => 20, 
+                'timePeriod' => 1,
+                'response' => ['done' => 'done', 'wait' => 'wait', 'error' => 'error'] ];
 
     /**
     *
@@ -35,6 +42,11 @@ class LongPooling
     */
     public function run(Array $config)
     {
+        //callback validation
+        if(!array_key_exists('callback', $config) or !($config['callback'] instanceof Closure)) {
+            echo "Invalid callback";
+            return;
+        }
 
         try {
 
@@ -54,22 +66,21 @@ class LongPooling
                                                 
                         if($data = $this->conns->getInfo()) {
                             
-                            $data['count']++;
+                            $data[self::COUNT]++;
 
-                            $return = call_user_func_array($this->config['callback'], array($conn, $data['request'], $data['data']));
+                            //response
+                            $responseCallback = call_user_func_array($this->config['callback'], array($conn, $data['request'], $data['data']));
 
-                            if($data['count'] >= $this->config['callsLimit'] or $return === true) {
+                            if($data[self::COUNT] >= $this->config['callsLimit'] or $responseCallback === true) {
 
-                                $this->conns->detach($conn);
-                                
-                                $data['finished'] = true;
+                                $this->conns->attach($conn, $data);                                
 
                                 //sent response
-                                $buffer = ( $return === true ? 
+                                $buffer = ( $responseCallback === true ? 
                                             $this->config['response']['done'] : 
-                                            ( $return === false ? 
+                                            ( $responseCallback === false ? 
                                                 $this->config['response']['wait'] : 
-                                                $this->prepareError('Invalid callback responce') ) );
+                                                $this->config['response']['error'] ) );
                                                             
                                 $conn->write($buffer);
                                 $conn->end();
@@ -80,7 +91,7 @@ class LongPooling
 
                     } catch (Exception $e) {
                         if($conn) {
-                            $conn->write($this->prepareError($e->getMessage(), $e->getCode()));
+                            $conn->write($this->config['response']['error']);
                             $conn->end(); 
                         }
                     }
@@ -100,8 +111,8 @@ class LongPooling
                     $conn->on('data', function ($data, $conn) {
                         //$request typeof React\Http\Request
                         list($request, $body) = (new RequestHeaderParser())->parseRequest($data);
-                        
-                        $this->conns->attach($conn, [   'count' => 0, 
+                        $this->fArr[] = $conn;
+                        $this->conns->attach($conn, [   self::COUNT => 0, 
                                                         'request' => $request, 
                                                         'data' => $body ] );
                     });
@@ -119,17 +130,5 @@ class LongPooling
         } catch (Exception $e) {
             echo "Server Run Exception: " . $e->getMessage() . ' / ' . $e->getCode();
         }
-    }
-
-    //format error message
-    protected function prepareError($message, $code = null)
-    {
-        $errorBuffer = $this->config['response']['error'];
-
-        if($code !== null) {
-            $errorBuffer = str_replace('{{ERROR_CODE}}', $code, $errorBuffer);
-        }
-
-        return str_replace('{{ERROR_MESSAGE}}', $message, $errorBuffer);
     }
 }

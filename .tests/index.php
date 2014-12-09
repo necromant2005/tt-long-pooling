@@ -19,18 +19,18 @@ $config = [
         'callsLimit' => 5,
         'callback' => 
             function (Connection $conn, Request $request, $data) { 
-                
-                throw new Exception(trim($data), 1);
-                
+                   
+                // throw new Exception("Error Processing Request", 1);
+                                          
                 return rand(1, 10) % 3 == 0 ? true : false;
             },
 
         'response' => [
             'done'    => $headerSt . 'done' . $headerEnd,
             'wait'    => $headerSt . 'wait' . $headerEnd,
-            'error'   => $headerSt . '{{ERROR_CODE}} : {{ERROR_MESSAGE}}' . $headerEnd, 
+            'error'   => $headerSt . 'error' . $headerEnd, 
         ],
         'listen' => [1337, 1338], 
     ]; 
-
+    
 $service->run($config);
