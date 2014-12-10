@@ -2,6 +2,10 @@
 
 namespace TweeLongPooling\Service;
 
+
+use TweeLongPooling\Service\LongPooling\TimePeriod;
+use TweeLongPooling\Service\LongPooling\ConnectionInfo;
+
 use SplObjectStorage;
 use Exception;
 use LogicException;
@@ -48,9 +52,7 @@ class LongPooling
 
     public function setPeriodicTimerCallback(Callable $callback)
     {
-
         $this->loop->addPeriodicTimer($this->timePeriod, $this->timerCallback);
-
     }
 
     /**

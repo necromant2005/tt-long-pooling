@@ -10,21 +10,13 @@ class LongPoolingTest extends PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('LogicException', 'Wrong periodic timer configuration', 302);
         
-        (new LongPooling)->run();
+        // (new LongPooling)->run();
     } 
 
     public function testCallbackError()
     {
         $this->setExpectedException('InvalidArgumentException', 'Invalid callback', 201);
         
-        (new LongPooling)->setPeriodicTimerConfig(['callback' => null])->run();
+        // (new LongPooling)->setPeriodicTimerConfig(['callback' => null])->run();
     } 
-
-    // Catchable fatal error 
-    // public function testTimerCallbackError()
-    // {
-    //     $this->setExpectedException('Exception');
-        
-    //     (new LongPooling)->setPeriodicTimerCallback([])->run();
-    // }  
 }
