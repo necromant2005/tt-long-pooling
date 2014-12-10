@@ -1,42 +1,51 @@
 <?php
 
-namespace TweeLongPooling\Service;
+namespace TweeLongPooling\Service\LongPooling;
 
 use BadMethodCallException;
 
 class ConnectionInfo
 {
-    protected $count = 0;
+    protected $counter = 0;
     protected $time;
     protected $request;
     protected $data;
 
     public function __construct($request, $data)
     {
-        $this->count = 0;
-        $this->time = time();
-        $this->request = $request;
-        $this->data = $data;
+        $this->counter  = 0;
+        $this->time     = time();
+        $this->request  = $request;
+        $this->data     = $data;
     }
 
-    public function incrementCount()
+    public function incrementcounterer()
     {
-        $this->count++;
+        $this->counter++;
     }    
 
-    public function decrementCount()
+    public function decrementcounterer()
     {
-        $this->count--;
+        $this->counter--;
     }
     
-    public function __call($fname, $args)
+    public function getCounter()
     {
-        $name = strtolower(str_replace('get', '', $fname));
+        return $this->counter;
+    }    
 
-        if(property_exists(__CLASS__, $name)) {
-            return $this->$name;
-        } else {
-            throw new BadMethodCallException('Bad method call', 201);
-        }
+    public function getTime()
+    {
+        return $this->time;
+    }
+
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    public function getData()
+    {
+        return $this->data;
     }
 }

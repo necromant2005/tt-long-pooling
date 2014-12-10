@@ -22,7 +22,7 @@ class LongPooling
     
     protected $conns;
 
-    protected $socks = [];
+    protected $loop;
     
     /**
     * The default config values
@@ -34,32 +34,23 @@ class LongPooling
 
     protected $timerCallback = null;
 
-    // protected $stopServer = false;
-
-    public function __construct(Array $listen = null, Integer $timePeriod = null)
+    public function __construct(Array $listen = null, Integer $timePeriod = null, Array $configTimer)
     {
         $this->listen = $listen ? : [1337];
         $this->timePeriod = $timePeriod ? : 1;
-    }
 
-    public function setPeriodicTimerConfig(Array $config)
-    {
-        if($this->timerCallback === null) {
-            $this->timerCallback = new TimerCallback;
-        }
-        $this->timerCallback->setConfig($config);
-
-        return $this;
+        $this->conns = new SplObjectStorage;
+        
+        $this->timerCallback = new TimerCallback($configTimer, $this->conns);
+        
+        $this->loop = Factory::create();
     }
 
     public function setPeriodicTimerCallback(Callable $callback)
     {
-        if($this->timerCallback === null) {
-            $this->timerCallback = new TimerCallback;
-        }        
-        $this->timerCallback->setCallback($callback);
 
-        return $this;
+        $this->loop->addPeriodicTimer($this->timePeriod, $this->timerCallback);
+
     }
 
     /**
@@ -69,29 +60,9 @@ class LongPooling
     */
     public function run()
     {
-        if($this->timerCallback === null) {
-            throw new LogicException('Wrong periodic timer configuration', 302);            
-        }
-
         try {
 
-            $this->conns = new SplObjectStorage;
-
-            $loop = Factory::create();
-
-            //periodic call
-            $loop->addPeriodicTimer($this->timePeriod, function() use ($loop) {
-                
-                // if($this->stopServer) {
-                //     $loop->stop();
-
-                //     foreach ($this->socks as $sock) {
-                //         $sock->shutdown();
-                //     }
-                // }
-                
-                call_user_func_array($this->timerCallback->getCallback(), [&$this->conns]);
-            });
+            $this->setPeriodicTimerCallback();
 
             //listening of the ports
             foreach ($this->listen as $port) {
@@ -124,10 +95,5 @@ class LongPooling
         } catch (Exception $e) {
             throw new RuntimeException("Server Run Exception", 301, $e);
         }
-    }
-
-    // public function stop()
-    // {
-    //     $this->stopServer = true;
-    // }    
+    }  
 }

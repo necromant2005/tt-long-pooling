@@ -1,9 +1,10 @@
 <?php 
 
-namespace TweeLongPooling\Service;
+namespace TweeLongPooling\Service\LongPooling;
 
 use Exception;
 use InvalidArgumentException;
+use SplObjectStorage;
 
 class TimerCallback
 {
@@ -11,47 +12,35 @@ class TimerCallback
                 'callsLimit' => 20, 
                 'response' => ['done' => 'done', 'wait' => 'wait', 'error' => 'error'] ];
 
-    private $callback;
+    private $conns;
 
-    public function setConfig(Array $config) 
+    public function __construct(Array $config, SplObjectStorage $conns) 
     {
         if(!array_key_exists('callback', $config) or !is_callable($config['callback'])) {
             throw new InvalidArgumentException('Invalid callback', 201);
         }
 
         $this->config = array_merge($this->config, $config);
+        $this->conns = $conns;
     }
 
-    public function setCallback(Callable $callback) 
+    public function __invoke()
     {
-        if(!is_callable($callback)) {
-            throw new InvalidArgumentException('Invalid time period callback', 202);
-        }         
-        $this->callback = $callback;
-    }
-
-    public function getCallback()
-    {
-        return $this->callback ? : $this->createCallback();
-    }
-
-    private function createCallback()
-    {
-        return function(&$conns) {
+        // return function() {
 
             //callback call
-            foreach($conns as $conn) {
+            foreach($this->conns as $conn) {
 
                 try {
                                             
-                    if($connInfo = $conns->getInfo()) {
+                    if($connInfo = $this->conns->getInfo()) {
                         
                         $connInfo->incrementCount();
 
                         //response
                         $responseCallback = call_user_func_array($this->config['callback'], array($conn, $connInfo->getRequest(), $connInfo->getData()));
 
-                        if($connInfo->getCount() >= $this->config['callsLimit'] or $responseCallback === true) {
+                        if($connInfo->getCounter() >= $this->config['callsLimit'] or $responseCallback === true) {
 
                             //sent response
                             $buffer = ( $responseCallback === true ? 
@@ -63,7 +52,7 @@ class TimerCallback
                             $conn->write($buffer);
                             $conn->end();
                         } else {
-                            $conns->attach($conn, $connInfo);
+                            $this->conns->attach($conn, $connInfo);
                         }
                     }
 
@@ -74,6 +63,6 @@ class TimerCallback
                     }
                 }
             }
-        };
+        // };
     }
 }

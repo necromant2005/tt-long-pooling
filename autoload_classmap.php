@@ -1,6 +1,6 @@
 <?php
 return array(
-    'TweeLongPooling\Service\LongPooling'       => __DIR__ . '/src/TweeLongPooling/Service/LongPooling.php',
-    'TweeLongPooling\Service\TimerCallback'     => __DIR__ . '/src/TweeLongPooling/Service/TimerCallback.php',
-    'TweeLongPooling\Service\ConnectionInfo'    => __DIR__ . '/src/TweeLongPooling/Service/ConnectionInfo.php',
+    'TweeLongPooling\Service\LongPooling'                   => __DIR__ . '/src/TweeLongPooling/Service/LongPooling.php',
+    'TweeLongPooling\Service\LongPooling\TimerCallback'     => __DIR__ . '/src/TweeLongPooling/Service/LongPooling/TimerCallback.php',
+    'TweeLongPooling\Service\LongPooling\ConnectionInfo'    => __DIR__ . '/src/TweeLongPooling/Service/LongPooling/ConnectionInfo.php',
 );
