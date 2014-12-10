@@ -13,8 +13,8 @@ if($client) {
     $conn->on('data', function ($data, $conn) use ($loop) {
         list($request, $body) = (new React\Http\RequestHeaderParser())->parseRequest($data);
         echo trim($body);
-        $loop->stop();
         $conn->close();
+        $loop->stop();
     });
 
     $conn->pipe(new React\Stream\Stream(fopen('php://stdout', 'w'), $loop));

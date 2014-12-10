@@ -4,7 +4,8 @@ namespace TweeLongPooling\Service;
 
 use SplObjectStorage;
 use Exception;
-use Closure;
+use LogicException;
+use RuntimeException;
 use React\EventLoop\Factory;
 use React\Socket\Server;
 use React\Socket\Connection;
@@ -12,8 +13,6 @@ use React\Http\RequestHeaderParser;
 
 class LongPooling
 {
-    const COUNT = 'count';
-
     /**
     *
     * Pull of the connections
@@ -22,84 +21,80 @@ class LongPooling
     */
     
     protected $conns;
+
+    protected $socks = [];
     
     /**
     * The default config values
     * 
     * @var array
     */
-    private $config = [
-                'listen' => [1337], 
-                'callsLimit' => 20, 
-                'timePeriod' => 1,
-                'response' => ['done' => 'done', 'wait' => 'wait', 'error' => 'error'] ];
+    protected $listen;
+    protected $timePeriod;
+
+    protected $timerCallback = null;
+
+    // protected $stopServer = false;
+
+    public function __construct(Array $listen = null, Integer $timePeriod = null)
+    {
+        $this->listen = $listen ? : [1337];
+        $this->timePeriod = $timePeriod ? : 1;
+    }
+
+    public function setPeriodicTimerConfig(Array $config)
+    {
+        if($this->timerCallback === null) {
+            $this->timerCallback = new TimerCallback;
+        }
+        $this->timerCallback->setConfig($config);
+
+        return $this;
+    }
+
+    public function setPeriodicTimerCallback(Callable $callback)
+    {
+        if($this->timerCallback === null) {
+            $this->timerCallback = new TimerCallback;
+        }        
+        $this->timerCallback->setCallback($callback);
+
+        return $this;
+    }
 
     /**
     *
     * Start server
     *
-    * @param array $config
     */
-    public function run(Array $config)
+    public function run()
     {
-        //callback validation
-        if(!array_key_exists('callback', $config) or !($config['callback'] instanceof Closure)) {
-            echo "Invalid callback";
-            return;
+        if($this->timerCallback === null) {
+            throw new LogicException('Wrong periodic timer configuration', 302);            
         }
 
         try {
 
             $this->conns = new SplObjectStorage;
 
-            $this->config = array_merge($this->config, $config);
-
             $loop = Factory::create();
 
             //periodic call
-            $loop->addPeriodicTimer($this->config['timePeriod'], function() use ($loop) {
+            $loop->addPeriodicTimer($this->timePeriod, function() use ($loop) {
+                
+                // if($this->stopServer) {
+                //     $loop->stop();
 
-                //callback call
-                foreach($this->conns as $conn) {
-
-                    try {
-                                                
-                        if($data = $this->conns->getInfo()) {
-                            
-                            $data[self::COUNT]++;
-
-                            //response
-                            $responseCallback = call_user_func_array($this->config['callback'], array($conn, $data['request'], $data['data']));
-
-                            if($data[self::COUNT] >= $this->config['callsLimit'] or $responseCallback === true) {
-
-                                $this->conns->attach($conn, $data);                                
-
-                                //sent response
-                                $buffer = ( $responseCallback === true ? 
-                                            $this->config['response']['done'] : 
-                                            ( $responseCallback === false ? 
-                                                $this->config['response']['wait'] : 
-                                                $this->config['response']['error'] ) );
-                                                            
-                                $conn->write($buffer);
-                                $conn->end();
-                            } else {
-                                $this->conns->attach($conn, $data);
-                            }
-                        }
-
-                    } catch (Exception $e) {
-                        if($conn) {
-                            $conn->write($this->config['response']['error']);
-                            $conn->end(); 
-                        }
-                    }
-                }
+                //     foreach ($this->socks as $sock) {
+                //         $sock->shutdown();
+                //     }
+                // }
+                
+                call_user_func_array($this->timerCallback->getCallback(), [&$this->conns]);
             });
 
             //listening of the ports
-            foreach ($this->config['listen'] as $port) {
+            foreach ($this->listen as $port) {
                 
                 $socket = new Server($loop);
                 
@@ -109,12 +104,9 @@ class LongPooling
                     $this->conns->attach($conn);
                     
                     $conn->on('data', function ($data, $conn) {
-                        //$request typeof React\Http\Request
+                        //$request insteadof React\Http\Request
                         list($request, $body) = (new RequestHeaderParser())->parseRequest($data);
-                        $this->fArr[] = $conn;
-                        $this->conns->attach($conn, [   self::COUNT => 0, 
-                                                        'request' => $request, 
-                                                        'data' => $body ] );
+                        $this->conns->attach($conn, new ConnectionInfo($request, $body));
                     });
 
                     $conn->on('end', function ($conn){
@@ -123,12 +115,19 @@ class LongPooling
                 });
 
                 $socket->listen($port);
+
+                $this->socks[] = $socket;
             }
 
             $loop->run();
 
         } catch (Exception $e) {
-            echo "Server Run Exception: " . $e->getMessage() . ' / ' . $e->getCode();
+            throw new RuntimeException("Server Run Exception", 301, $e);
         }
     }
+
+    // public function stop()
+    // {
+    //     $this->stopServer = true;
+    // }    
 }
