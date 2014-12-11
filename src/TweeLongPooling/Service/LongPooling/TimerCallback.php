@@ -38,8 +38,8 @@ class TimerCallback
 
     public function __construct(Array $options, SplObjectStorage $conns) 
     {
-        if(!array_key_exists(self::OPT_CALLBACK, $options) or !is_callable($options[self::OPT_CALLBACK])) {
-            throw new InvalidArgumentException('Invalid callback', 201);
+        if(!($clbExists = array_key_exists(self::OPT_CALLBACK, $options)) or !is_callable($options[self::OPT_CALLBACK])) {
+            throw new InvalidArgumentException('Invalid callback', ($clbExists ? 202 : 201));
         }
 
         $this->options = array_merge($this->options, $options);
@@ -67,7 +67,7 @@ class TimerCallback
                                     ( $responseCallback === false ? 
                                         $this->options[self::OPT_RESPONSE][self::OPT_RESPONSE_WAIT] : 
                                         $this->options[self::OPT_RESPONSE][self::OPT_RESPONSE_ERROR] ) );
-                                                    
+
                         $conn->write($buffer);
                         $conn->end();
                     } else {

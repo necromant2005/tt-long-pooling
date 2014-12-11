@@ -6,14 +6,13 @@ use BadMethodCallException;
 
 class ConnectionInfo
 {
-    protected $counter = 0;
-    protected $time = 0;
-    protected $request = null;
-    protected $data = '';
+    protected $counter  = 0;
+    protected $time     = 0;
+    protected $request  = null;
+    protected $data     = '';
 
     public function __construct($request, $data)
     {
-        $this->counter  = 0;
         $this->time     = time();
         $this->request  = $request;
         $this->data     = $data;

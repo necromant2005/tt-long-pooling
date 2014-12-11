@@ -4,7 +4,6 @@ namespace TweeLongPooling\Service;
 
 use SplObjectStorage;
 use Exception;
-use LogicException;
 use RuntimeException;
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
@@ -127,22 +126,3 @@ class LongPooling
         }
     }  
 }
-
-/*
-$this->loop->addPeriodicTimer($this->timerPeriod, $this->getTimerCallback());
-https://github.com/necromant2005/tt-long-pooling/blob/master/src/TweeLongPooling/Service/LongPooling/TimerCallback.php
-$this->config['response']['error']
-protected $loop;
-$this->loop
-$service->setLoop($mockLoop);
-.
-.
-.
-.
-$service = new LongPooling();
-$mock = $this->getMock($service->getLoop());
-$mock->once()->method('run');
-$service->run();
-$mock->once()->method('run')->asssrtInput(1, $service->getTimerCallback());
-$mock->once()->method('addPeriodTimer')->asssrtInput(1, $service->getTimerCallback());
-*/
