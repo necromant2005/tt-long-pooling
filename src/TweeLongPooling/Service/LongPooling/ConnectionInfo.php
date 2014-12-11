@@ -7,9 +7,9 @@ use BadMethodCallException;
 class ConnectionInfo
 {
     protected $counter = 0;
-    protected $time;
-    protected $request;
-    protected $data;
+    protected $time = 0;
+    protected $request = null;
+    protected $data = '';
 
     public function __construct($request, $data)
     {
@@ -19,12 +19,12 @@ class ConnectionInfo
         $this->data     = $data;
     }
 
-    public function incrementcounterer()
+    public function incrementCounter()
     {
         $this->counter++;
     }    
 
-    public function decrementcounterer()
+    public function decrementCounter()
     {
         $this->counter--;
     }

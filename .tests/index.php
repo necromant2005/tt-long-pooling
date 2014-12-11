@@ -18,8 +18,8 @@ $config = [
         'callback' => 
             function (Connection $conn, Request $request, $data) { 
                    
-                // throw new Exception("Error Processing Request", 1);
-                                          
+                throw new Exception("Error Processing Request", 1); 
+
                 return rand(1, 10) % 3 == 0 ? true : false;
             },
 
@@ -30,4 +30,4 @@ $config = [
         ],
     ]; 
     
-(new LongPooling)->setPeriodicTimerConfig($config)->run();
+(new LongPooling($config))->run();
