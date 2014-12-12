@@ -16,7 +16,6 @@ class TimerCallback
     CONST OPT_RESPONSE_ERROR    = 'error';
 
     /**
-    *
     * Default options
     *
     * @var Array
@@ -29,13 +28,19 @@ class TimerCallback
                     self::OPT_RESPONSE_ERROR  => 'error'] ];
 
     /**
-    *
     * Pull of the connections
     *
     * @var SplObjectStorage
     */
     private $conns;
-
+    
+    /**
+    * Constructor
+    * 
+    * @param Array $options
+    * @param SplObjectStorage $conns
+    * @throws InvalidArgumentException
+    */
     public function __construct(Array $options, SplObjectStorage $conns) 
     {
         if(!($clbExists = array_key_exists(self::OPT_CALLBACK, $options)) or !is_callable($options[self::OPT_CALLBACK])) {
@@ -46,6 +51,11 @@ class TimerCallback
         $this->conns = $conns;
     }
 
+    /**
+    * Timmer callback logic
+    * 
+    * @throws Exception
+    */    
     public function __invoke()
     {
         foreach($this->conns as $conn) {

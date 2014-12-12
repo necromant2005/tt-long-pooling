@@ -10,14 +10,14 @@ class ConnectionInfoTest extends PHPUnit_Framework_TestCase
 
     public function testGetCounter()
     {
-        $connInfo  = new LongPooling\ConnectionInfo(null, null);
+        $connInfo  = new LongPooling\ConnectionInfo(null, '');
 
         $this->assertEquals(0, $connInfo->getCounter());
     }
     
     public function testGetTime()
     {
-        $connInfo  = new LongPooling\ConnectionInfo(null, null);
+        $connInfo  = new LongPooling\ConnectionInfo(null, '');
 
         $this->assertEquals(time(), $connInfo->getTime(), '', 1);
     }
@@ -27,7 +27,7 @@ class ConnectionInfoTest extends PHPUnit_Framework_TestCase
     */
     public function testIncrementCounter()
     {
-        $connInfo = new LongPooling\ConnectionInfo(null, null);
+        $connInfo = new LongPooling\ConnectionInfo(null, '');
 
         $connInfo->incrementCounter(); 
 
@@ -39,7 +39,7 @@ class ConnectionInfoTest extends PHPUnit_Framework_TestCase
     */
     public function testDecrementGetCounter()
     {
-        $connInfo = new LongPooling\ConnectionInfo(null, null);
+        $connInfo = new LongPooling\ConnectionInfo(null, '');
         
         $connInfo->decrementCounter();
         
@@ -48,7 +48,7 @@ class ConnectionInfoTest extends PHPUnit_Framework_TestCase
 
     public function testGetRequest()
     {
-        $connInfo  = new LongPooling\ConnectionInfo($this->testString, null);
+        $connInfo  = new LongPooling\ConnectionInfo($this->testString, '');
 
         $this->assertEquals($this->testString, $connInfo->getRequest());
     } 

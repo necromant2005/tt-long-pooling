@@ -32,9 +32,7 @@ class TimerCallbackTest extends PHPUnit_Framework_TestCase
     public function testIteration()
     {
         $options = [
-            LongPooling\TimerCallback::OPT_CALLS_LIMIT => 2,
             LongPooling\TimerCallback::OPT_CALLBACK => function() { return false; },
-            LongPooling\TimerCallback::OPT_RESPONSE => [],
         ];  
     
         $mock = $this->getMock('stdClass', array('write', 'end'));

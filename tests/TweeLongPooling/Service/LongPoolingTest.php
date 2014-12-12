@@ -19,4 +19,28 @@ class LongPoolingTest extends PHPUnit_Framework_TestCase
         
         (new LongPooling([LongPooling\TimerCallback::OPT_CALLBACK => null]))->run();
     } 
+    
+    public function testLoop()
+    {
+        $options = [
+            LongPooling\TimerCallback::OPT_CALLBACK => function() { return false; },
+        ];  
+
+        $timePeriod = 11;
+
+        $service = new LongPooling($options, [], $timePeriod);
+        
+        $mock = $this->getMock(get_class($service->getLoop()));
+        
+        $mock->expects($this->once())->method('run');
+
+        $mock->expects($this->once())
+            ->method('addPeriodicTimer')
+            ->with($this->equalTo($timePeriod),
+                $this->equalTo($service->getPeriodicTimerCallback()));
+
+        $service->setLoop($mock);
+
+        $service->run();
+    }
 }

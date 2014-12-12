@@ -14,7 +14,6 @@ use React\Http\RequestHeaderParser;
 class LongPooling
 {
     /**
-    *
     * Pull of the connections
     *
     * @var SplObjectStorage
@@ -22,24 +21,23 @@ class LongPooling
     protected $conns = null;
 
     /**
-    *
     * Events loop
     *
-    * @var LibEventLoop|LibEvLoop|StreamSelectLoop
+    * @var LoopInterface
     */    
     protected $loop = null;
     
     /**
-    * Default port
+    * Default ports
     * 
-    * @var array
+    * @var Array
     */
     protected $listen = [1337];
 
     /**
     * Default time period for periodic timer
     * 
-    * @var array
+    * @var Integer
     */
     protected $timePeriod = 1;
     
@@ -50,10 +48,17 @@ class LongPooling
     */
     protected $timerCallback = null;
 
+    /**
+    * Constructor
+    * 
+    * @param Array $configTimer
+    * @param Array $listen
+    * @param Integer $timePeriod
+    */
     public function __construct(Array $configTimer, Array $listen = null, $timePeriod = null)
     {
         $this->listen = $listen ? : $this->listen;
-        $this->timePeriod = (int)$timePeriod ? : $this->timePeriod;
+        $this->timePeriod = (int)$timePeriod ? (int)$timePeriod : $this->timePeriod;
 
         $this->conns = new SplObjectStorage;
 
@@ -62,30 +67,50 @@ class LongPooling
         $this->loop = Factory::create();
     }
 
+    /**
+    * Set timmer callback
+    * 
+    * @param TimerCallback $timerCallback
+    */
     public function setPeriodicTimerCallback(LongPooling\TimerCallback $timerCallback)
     {
         $this->timerCallback = $timerCallback;
     }
 
+    /**
+    * Get timmer callback
+    * 
+    * @return TimerCallback
+    */
     public function getPeriodicTimerCallback()
     {
         return $this->timerCallback;
     }
 
-    public function getLoop()
-    {
-        return $this->loop;
-    }
-
+    /**
+    * Set event loop
+    * 
+    * @param LoopInterface $loop
+    */
     public function setLoop(LoopInterface $loop)
     {
         $this->loop = $loop;
     }
 
     /**
-    *
+    * Get event loop
+    * 
+    * @return LoopInterface
+    */
+    public function getLoop()
+    {
+        return $this->loop;
+    }
+
+    /**
     * Start server
     *
+    * @throws RuntimeException
     */
     public function run()
     {
@@ -115,8 +140,6 @@ class LongPooling
                 });
 
                 $socket->listen($port);
-
-                $this->socks[] = $socket;
             }
 
             $this->loop->run();
