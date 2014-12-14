@@ -14,9 +14,9 @@
         }
     ],    
     "require": {
-        "react/react": "0.4.*",
         "php": ">=5.4.0",
-        "ext-libevent": "*"        
+        "react/react": "0.4.*",
+        "ext-libevent": "*"
     },
     "autoload": {
         "psr-0": {
