@@ -7,6 +7,13 @@ php:
 before_script:
     - sudo apt-get update -qq
     - sudo apt-get install -qq libevent-dev
-    - echo -ne '\n' | sudo pecl install -f libevent-beta
+    - curl http://pecl.php.net/get/libevent-0.1.0.tgz | tar -xz
+    - cd libevent-0.1.0
+    - phpize
+    - ./configure
+    - make
+    - sudo make install
+    - cd ..
+    - rm -R libevent-0.1.0    
     - echo "extension=libevent.so" >> "$(php -r 'echo php_ini_loaded_file();')"
     - composer install
