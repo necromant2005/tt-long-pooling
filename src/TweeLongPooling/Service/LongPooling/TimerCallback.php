@@ -43,7 +43,7 @@ class TimerCallback
     */
     public function __construct(Array $options, SplObjectStorage $conns) 
     {
-        if(!($clbExists = array_key_exists(self::OPT_CALLBACK, $options)) or !is_callable($options[self::OPT_CALLBACK])) {
+        if (!($clbExists = array_key_exists(self::OPT_CALLBACK, $options)) || !is_callable($options[self::OPT_CALLBACK])) {
             throw new InvalidArgumentException('Invalid callback', ($clbExists ? 202 : 201));
         }
 
@@ -62,14 +62,14 @@ class TimerCallback
 
             try {
 
-                if($connInfo = $this->conns->getInfo()) {
+                if ($connInfo = $this->conns->getInfo()) {
                     
                     $connInfo->incrementCounter();
 
                     //response
                     $responseCallback = call_user_func_array($this->options[self::OPT_CALLBACK], array($conn, $connInfo->getRequest(), $connInfo->getData()));
 
-                    if($connInfo->getCounter() >= $this->options[self::OPT_CALLS_LIMIT] or $responseCallback === true) {
+                    if ($connInfo->getCounter() >= $this->options[self::OPT_CALLS_LIMIT] || $responseCallback === true) {
 
                         //sent response
                         $buffer = ( $responseCallback === true ? 
@@ -86,7 +86,7 @@ class TimerCallback
                 }
 
             } catch (Exception $e) {
-                if($conn) {
+                if ($conn) {
                     $conn->write($this->options[self::OPT_RESPONSE][self::OPT_RESPONSE_ERROR]);
                     $conn->end(); 
                 }
